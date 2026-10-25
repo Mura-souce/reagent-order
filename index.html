@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>試薬・備品　見積依頼フォーム</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap">
+<style>
+/* Layout: Single centered card, lab ordering tool */
+:root {
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface2: #f4f7fb;
+  --border: #c8d3e0;
+  --border-focus: #2563eb;
+  --fg: #1a2233;
+  --fg-muted: #5a6a82;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-fg: #ffffff;
+  --accent-ring: rgba(37,99,235,0.20);
+  --error: #dc2626;
+  --success: #16a34a;
+  --r: 8px;
+  --shadow: 0 2px 8px rgba(15,25,50,.09), 0 8px 24px rgba(15,25,50,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1525;
+    --surface: #1a2540;
+    --surface2: #111c35;
+    --border: #2d3f5c;
+    --fg: #e8eef8;
+    --fg-muted: #8a9bba;
+    --accent: #3b82f6;
+    --accent-hover: #60a5fa;
+    --accent-ring: rgba(59,130,246,0.25);
+    --error: #f87171;
+    --success: #4ade80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1525;
+  --surface: #1a2540;
+  --surface2: #111c35;
+  --border: #2d3f5c;
+  --fg: #e8eef8;
+  --fg-muted: #8a9bba;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-ring: rgba(59,130,246,0.25);
+  --error: #f87171;
+  --success: #4ade80;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: var(--accent);
+  padding: 1.25rem 1.75rem;
+}
+.card-header h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.15rem;
+}
+.card-header p {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.78);
+}
+
+.card-body {
+  padding: 1.5rem 1.75rem;
+}
+
+.field { margin-bottom: 1.1rem; }
+
+.field-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 0.4rem;
+}
+.field-label .req { color: var(--error); margin-left: 2px; }
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface2);
+  color: var(--fg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  background: var(--surface);
+}
+input.error-field, select.error-field { border-color: var(--error); }
+
+.error-text {
+  font-size: 0.76rem;
+  color: var(--error);
+  margin-top: 0.3rem;
+  display: none;
+}
+.error-text.show { display: block; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--fg-muted);
+  margin-bottom: 0.85rem;
+}
+
+/* Reagent card */
+.reagent-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.r-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.r-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.btn-remove {
+  background: transparent;
+  border: none;
+  color: var(--fg-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s;
+}
+.btn-remove:hover { opacity: 1; color: var(--error); }
+
+.reagent-row {
+  display: grid;
+  grid-template-columns: 1fr 88px;
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.qty-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.qty-label {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+}
+
+input[type="number"] {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Add row button */
+.btn-add {
+  width: 100%;
+  padding: 0.58rem;
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r);
+  color: var(--fg-muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 1.25rem;
+}
+.btn-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface2);
+}
+
+/* Submit */
+.btn-submit {
+  width: 100%;
+  padding: 0.82rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: none;
+  border-radius: var(--r);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-submit:hover { background: var(--accent-hover); }
+.btn-submit:active { transform: scale(0.98); }
+
+/* Result area */
+.result-area { margin-top: 1.5rem; display: none; }
+.result-area.show { display: block; }
+
+.email-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1rem;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  line-height: 1.85;
+  font-family: inherit;
+  margin-bottom: 0.75rem;
+}
+
+.action-row { display: flex; gap: 0.5rem; }
+
+.btn-copy {
+  flex: 1;
+  padding: 0.62rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: center;
+}
+.btn-copy:hover { background: var(--surface2); }
+.btn-copy.ok { color: var(--success); border-color: var(--success); }
+
+.btn-open {
+  flex: 1.2;
+  padding: 0.62rem;
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--r);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  transition: background 0.15s;
+}
+.btn-open:hover { background: var(--accent-hover); }
+
+.hint {
+  font-size: 0.73rem;
+  color: var(--fg-muted);
+  margin-top: 0.55rem;
+  line-height: 1.6;
+}
+
+.lab-badge {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  text-align: center;
+  margin-top: 1.25rem;
+  letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <h1>試薬・備品　見積依頼フォーム</h1>
+    <p>正晃株式会社 上池様 宛</p>
+  </div>
+
+  <div class="card-body">
+    <form id="quoteForm" novalidate>
+
+      <div class="field">
+        <label class="field-label" for="name">お名前 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="例：山田 太郎">
+        <div class="error-text" id="name-err">お名前を入力してください</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">品目・数量</div>
+
+      <div id="reagents"></div>
+
+      <div class="error-text" id="reagent-err" style="margin-bottom: 0.6rem">品目を1つ以上選択してください</div>
+
+      <button type="button" class="btn-add" id="addBtn">＋ 品目を追加</button>
+
+      <div class="divider"></div>
+      <button type="submit" class="btn-submit">OK → メール作成</button>
+    </form>
+
+    <div class="result-area" id="result">
+      <div class="divider"></div>
+      <div class="section-label">作成されたメール本文</div>
+      <div class="email-box" id="emailBody"></div>
+      <div class="action-row">
+        <button class="btn-copy" id="copyBtn">本文をコピー</button>
+        <a class="btn-open" id="mailtoLink" href="#">Outlook で開く</a>
+      </div>
+      <p class="hint">
+        ※「Outlook で開く」をクリックすると Outlook が起動します。<br>
+        　反応しない場合は「本文をコピー」して Outlook に貼り付けてください。
+      </p>
+    </div>
+  </div>
+</div>
+
+<p class="lab-badge">九州大学 平松研究室</p>
+
+<script>
+var TO      = 'fuku-nishi@seikonet.co.jp';
+var SUBJECT = '試薬・備品　見積依頼のお願い';
+
+// ===== 品目リスト（ここを編集してください） =====
+var ITEMS = {
+  '試薬': [
+    'D-MEM（高）\t和光純薬\t04330085',
+    'D-MEM（低）\t和光純薬\t04129775',
+    'D-MEM（低・no phenol red）\tThermo\t21063029',
+    'D-PBS\t和光純薬\t04529795',
+    'PBS\t和光純薬\t16623555',
+    'FBS（500 mL）\tコーニング・インタ\t35-010-CV',
+    'PS（15 mL）\t和光純薬\t16823191',
+    'トリプシン 0.25%（500 mL）\t和光純薬\t20116945',
+    'HBSS\tSIG-ALD\tH8264-500ML',
+    'Opti-MEM\tThermo\t11058021',
+    'Insulin-Transferrin-Selenium\tThermo\t41400045'
+  ],
+  '備品': [
+    // チップ
+    'チップ（1 mL）\tアズワン\t3-6629-077',
+    'チップ 詰め替え（1250 µL）\tQSP\tT112XLRL-Q',
+    // ディスポピペット
+    'ディスポピペット（50 mL）\tレオナ\t3-305-0555',
+    'ディスポピペット（10 mL）\tレオナ\t3-305-0553',
+    'ディスポピペット（5 mL）\tレオナ\t3-305-0552',
+    // チューブ
+    '遠沈管（50 mL）\tIWAKI\t2324-050N',
+    '遠沈管（15 mL）\tIWAKI\t2324-015N',
+    'マイクロテストチューブ（1.5 mL）\tMonotaRO\t34680642',
+    // ディッシュ
+    'ディッシュ（100 mm）\tIWAKI\t3020-100',
+    'ガラスボトムディッシュ（35 mm）\t松浪硝子(株)\tD11141H',
+    // スライドガラス
+    'スライドガラス\t松浪硝子(株)\tS000110',
+    'MASコートスライドガラス\t松浪硝子(株)\tMAS-02',
+    'カバーガラス 24×32\t松浪硝子(株)\tC024321',
+    'ホールスライドガラス\tケニス\t3-150-0618',
+    // ワイプ・タオル
+    'キムワイプ\tクレシア\t62011',
+    'キムタオル\tクレシア\t61001',
+    // 手袋
+    'ゴム手袋（L）\tMonotaRO\t13150185',
+    'ゴム手袋（M）\tMonotaRO\t13150176',
+    // ゴミ袋
+    'ゴミ袋（オートクレーブ）\tアズワン\t7-5322-02',
+    'ゴミ袋（一般）\tMonotaRO\t45557906'
+  ]
+};
+
+// セレクトはHTML（optgroup付き）
+var optionsHTML = '<option value="">── 選択してください ──</option>';
+Object.keys(ITEMS).forEach(function(group) {
+  optionsHTML += '<optgroup label="' + group + '">';
+  ITEMS[group].forEach(function(item) {
+    var parts = item.split('\t');
+    var name = parts[0], maker = parts[1], code = parts[2];
+    var label = name + '　' + maker + '　' + code;
+    optionsHTML += '<option value="' + label + '">' + label + '</option>';
+  });
+  optionsHTML += '</optgroup>';
+});
+
+// 行カウンター
+var rowSeq = 0;
+
+function makeCard(n) {
+  var div = document.createElement('div');
+  div.className = 'reagent-card';
+  div.id = 'card-' + n;
+  div.innerHTML =
+    '<div class="r-header">' +
+      '<div class="r-title">品目 ' + n + '</div>' +
+      '<button type="button" class="btn-remove" onclick="removeCard(' + n + ')" title="削除">×</button>' +
+    '</div>' +
+    '<div class="reagent-row">' +
+      '<select id="r' + n + '">' + optionsHTML + '</select>' +
+      '<div class="qty-wrap">' +
+        '<span class="qty-label">個数</span>' +
+        '<input type="number" id="q' + n + '" min="1" value="1">' +
+      '</div>' +
+    '</div>';
+  return div;
+}
+
+function addCard() {
+  rowSeq++;
+  document.getElementById('reagents').appendChild(makeCard(rowSeq));
+  renumberTitles();
+}
+
+function removeCard(n) {
+  var el = document.getElementById('card-' + n);
+  if (el) el.remove();
+  renumberTitles();
+}
+
+function renumberTitles() {
+  var cards = document.querySelectorAll('.reagent-card');
+  cards.forEach(function(card, i) {
+    card.querySelector('.r-title').textContent = '品目 ' + (i + 1);
+  });
+}
+
+function getAllRows() {
+  var cards = document.querySelectorAll('.reagent-card');
+  var rows = [];
+  cards.forEach(function(card) {
+    var sel = card.querySelector('select');
+    var qty = card.querySelector('input[type="number"]');
+    if (sel && qty) {
+      rows.push({ val: sel.value, qty: parseInt(qty.value) || 1 });
+    }
+  });
+  return rows;
+}
+
+// 初期表示：3行
+addCard(); addCard(); addCard();
+
+document.getElementById('addBtn').addEventListener('click', addCard);
+
+// Submit
+document.getElementById('quoteForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var valid = true;
+
+  var nameInput = document.getElementById('name');
+  var nameErr   = document.getElementById('name-err');
+  var name = nameInput.value.trim();
+  if (!name) {
+    valid = false;
+    nameErr.classList.add('show');
+    nameInput.classList.add('error-field');
+  } else {
+    nameErr.classList.remove('show');
+    nameInput.classList.remove('error-field');
+  }
+
+  var rows = getAllRows();
+  var lines = [];
+  rows.forEach(function(row) {
+    if (row.val) lines.push('・' + row.val + '　' + row.qty + '個');
+  });
+
+  var reagentErr = document.getElementById('reagent-err');
+  if (lines.length === 0) {
+    valid = false;
+    reagentErr.classList.add('show');
+  } else {
+    reagentErr.classList.remove('show');
+  }
+
+  if (!valid) return;
+
+  var body =
+    '正晃株式会社\n' +
+    '上池様\n\n' +
+    'いつも大変お世話になっております。九州大学平松研究室の' + name + 'です。\n' +
+    '以下の試薬・備品のお見積りをお願いしたく、ご連絡差し上げました。\n\n' +
+    lines.join('\n') + '\n\n' +
+    name;
+
+  document.getElementById('emailBody').textContent = body;
+
+  var href = 'mailto:' + TO +
+    '?subject=' + encodeURIComponent(SUBJECT) +
+    '&body='    + encodeURIComponent(body);
+  document.getElementById('mailtoLink').href = href;
+
+  var result = document.getElementById('result');
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth' });
+
+  window.location.href = href;
+});
+
+// Copy
+document.getElementById('copyBtn').addEventListener('click', function() {
+  var text = document.getElementById('emailBody').textContent;
+  var btn  = this;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = '✓ コピーしました';
+    btn.classList.add('ok');
+    setTimeout(function() {
+      btn.textContent = '本文をコピー';
+      btn.classList.remove('ok');
+    }, 2200);
+  }).catch(function() {
+    var range = document.createRange();
+    range.selectNodeContents(document.getElementById('emailBody'));
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+});
+</script>
+</body>
+</html>
