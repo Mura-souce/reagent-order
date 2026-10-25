@@ -361,7 +361,7 @@ input[type="number"] {
         <a class="btn-open" id="mailtoLink" href="#">Outlook で開く</a>
       </div>
       <p class="hint">
-        ※「Outlook で開く」をクリックすると Outlook が起動します。<br>
+        ※「Outlook で開」をクリックすると Outlook が起動します。<br>
         　反応しない場合は「本文をコピー」して Outlook に貼り付けてください。
       </p>
     </div>
@@ -404,12 +404,12 @@ var ITEMS = {
     // ディッシュ
     'ディッシュ（100 mm）\tIWAKI\t3020-100',
     'ガラスボトムディッシュ（35 mm）\t松浪硝子(株)\tD11141H',
-    // スライドガラス
-    'スライドガラス\t松浪硝子(株)\tS000110',
-    'MASコートスライドガラス\t松浪硝子(株)\tMAS-02',
+    // スラアドガラス
+    'スラアドガラス\t松浪硝子(株)\tS000110',
+    'MASコートスラアドガラス\t松浪硝子(株)\tMAS-02',
     'カバーガラス 24×32\t松浪硝子(株)\tC024321',
-    'ホールスライドガラス\tケニス\t3-150-0618',
-    // ワイプ・タオル
+    'ホールスラアドガラス\tケニス\t3-150-0618',
+    // ワイプータオル
     'キムワイプ\tクレシア\t62011',
     'キムタオル\tクレシア\t61001',
     // 手袋
@@ -533,6 +533,8 @@ document.getElementById('quoteForm').addEventListener('submit', function(e) {
     'いつも大変お世話になっております。九州大学平松研究室の' + name + 'です。\n' +
     '以下の試薬・備品のお見積りをお願いしたく、ご連絡差し上げました。\n\n' +
     lines.join('\n') + '\n\n' +
+    'どうぜりではいいたします。\n\n' +
+    '九州大学大学院理学府化学専攻　光物理化学研究室\n' +
     name;
 
   document.getElementById('emailBody').textContent = body;
